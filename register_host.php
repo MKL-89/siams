@@ -32,10 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!filter_var($s['email'], FILTER_VALIDATE_EMAIL)) {
         $errors[] = "Please enter a valid email for the supervisor's login.";
     }
-    if (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) {
-        $errors[] = 'Password must be at least 8 characters and contain letters and numbers.';
-    } elseif ($password !== $confirm) {
-        $errors[] = 'The two passwords do not match.';
+    if ($problem = password_problem($password, $confirm)) {
+        $errors[] = $problem;
     }
     if (!$errors) {
         $exists = db()->prepare('SELECT 1 FROM users WHERE email = ?');
@@ -59,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->prepare('INSERT INTO ind_supervisors (user_id, org_id, position) VALUES (?, ?, ?)')
             ->execute([$userId, $orgId, $s['position']]);
         $pdo->commit();
+        log_action('host_registered', $o['name'] . ' (' . $s['email'] . ')', $userId);
         $done = true;
     }
 }

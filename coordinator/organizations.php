@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                            SET u.status = ? WHERE i.org_id = ? AND u.status = 'pending'")
                 ->execute([$userStatus, $orgId]);
             $pdo->commit();
+            log_action('organization_' . $orgStatus, 'Organization #' . $orgId);
             flash('Organization ' . $orgStatus . '.');
         } else {
             $pdo->rollBack();

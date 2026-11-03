@@ -13,6 +13,13 @@
 .login-card { width: 100%; max-width: 420px; border: 0; border-top: 4px solid var(--siams-primary); }
 .login-logo { font-size: 2.5rem; color: var(--siams-primary); }
 
+/* Printing: only the page content, without menus and buttons */
+@media print {
+    nav.navbar, footer, .btn { display: none !important; }
+    body { background: #fff !important; }
+    .card { border: 0 !important; box-shadow: none !important; }
+}
+
 /* Dashboard summary cards */
 .stat-card { border: 0; border-left: 4px solid var(--siams-primary); }
 .stat-card .stat-value { font-size: 1.8rem; font-weight: 600; color: var(--siams-primary); }

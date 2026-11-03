@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->prepare("UPDATE applications SET status = 'rejected', decided_at = NOW() WHERE application_id = ?")
             ->execute([$pl['application_id']]);
         $pdo->commit();
+        log_action('placement_rejected', 'Placement #' . $placementId);
         flash('Placement rejected.');
         redirect($back);
     }
@@ -61,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                    WHERE student_id = ? AND status IN ('pending','accepted') AND application_id <> ?")
         ->execute([$pl['student_id'], $pl['application_id']]);
     $pdo->commit();
+    log_action('placement_approved', 'Placement #' . $placementId);
     flash('Placement approved.');
     redirect($back);
 }

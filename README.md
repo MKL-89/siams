@@ -36,3 +36,8 @@ Change the database password and remove the test accounts before using the syste
 | 5. Electronic logbook | FR-10, FR-15 |
 | 6. Assessments and final mark | FR-11, FR-16, FR-19, FR-24 |
 | 7. Document uploads | FR-08 |
+| 8. Reports and administration | FR-02, FR-05, FR-25, FR-26, FR-27, FR-28 |
+
+FR-02 (forgotten password) is handled by the administrator, who sets a new password
+for the user; the system does not send email. Every user can change their own
+password under **My account** (click your name in the menu bar).

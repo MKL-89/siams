@@ -217,6 +217,20 @@ CREATE TABLE documents (
 ) ENGINE=InnoDB;
 
 -- ------------------------------------------------------------
+-- Activity log of important actions (FR-27)
+-- ------------------------------------------------------------
+CREATE TABLE audit_log (
+    log_id         INT AUTO_INCREMENT PRIMARY KEY,
+    user_id        INT NULL,
+    action         VARCHAR(60) NOT NULL,
+    details        VARCHAR(255),
+    ip_address     VARCHAR(45),
+    created_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_audit_time (created_at),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- ------------------------------------------------------------
 -- System settings (university policy values)
 -- ------------------------------------------------------------
 CREATE TABLE settings (

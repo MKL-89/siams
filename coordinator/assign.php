@@ -18,6 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = db()->prepare("UPDATE placements SET lecturer_id = ?, assigned_at = NOW()
                                WHERE placement_id = ? AND status IN ('approved','ongoing')");
         $stmt->execute([$lecturerId, $placementId]);
+        if ($stmt->rowCount()) {
+            log_action('supervisor_assigned', 'Placement #' . $placementId . ' to lecturer #' . $lecturerId);
+        }
         flash($stmt->rowCount() ? 'University supervisor assigned.' : 'No change was made.', $stmt->rowCount() ? 'success' : 'warning');
     }
     redirect($back);

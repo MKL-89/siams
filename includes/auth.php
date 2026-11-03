@@ -124,6 +124,7 @@ function attempt_login(string $email, string $password): ?string
 
     if (!$user || !password_verify($password, $user['password_hash'])) {
         record_attempt($email, false);
+        log_action('login_failed', $email, $user ? (int) $user['user_id'] : null);
         return 'Incorrect email or password.';
     }
     if ($user['status'] === 'pending') {
@@ -143,6 +144,7 @@ function attempt_login(string $email, string $password): ?string
     unset($_SESSION['csrf_token']);
 
     db()->prepare('UPDATE users SET last_login = NOW() WHERE user_id = ?')->execute([$user['user_id']]);
+    log_action('login', $email);
     return null;
 }
 

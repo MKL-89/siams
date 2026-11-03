@@ -16,6 +16,25 @@ const SECTORS = [
     'Telecommunications', 'Agriculture', 'Non-governmental Organization', 'Other',
 ];
 
+/** Records an important action in the activity log (FR-27). */
+function log_action(string $action, string $details = '', ?int $userId = null): void
+{
+    db()->prepare('INSERT INTO audit_log (user_id, action, details, ip_address) VALUES (?, ?, ?, ?)')
+        ->execute([$userId ?? ($_SESSION['user_id'] ?? null), $action, mb_substr($details, 0, 255), $_SERVER['REMOTE_ADDR'] ?? 'cli']);
+}
+
+/** Password rule used everywhere: at least 8 characters with letters and numbers. Returns an error or null. */
+function password_problem(string $password, string $confirm): ?string
+{
+    if (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+        return 'Password must be at least 8 characters and contain letters and numbers.';
+    }
+    if ($password !== $confirm) {
+        return 'The two passwords do not match.';
+    }
+    return null;
+}
+
 /** Stores a one-time message to show on the next page. */
 function flash(string $message, string $type = 'success'): void
 {

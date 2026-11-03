@@ -8,7 +8,12 @@ $role = current_role();
 
 // Menu items per role: label => path. New modules add their pages here.
 $menus = [
-    'admin'       => ['Dashboard' => '/admin/index.php'],
+    'admin'       => [
+        'Dashboard'    => '/admin/index.php',
+        'Users'        => '/admin/users.php',
+        'Activity log' => '/admin/audit.php',
+        'Backup'       => '/admin/backup.php',
+    ],
     'coordinator' => [
         'Dashboard'     => '/coordinator/index.php',
         'Organizations' => '/coordinator/organizations.php',
@@ -17,6 +22,7 @@ $menus = [
         'Supervisors'   => '/coordinator/assign.php',
         'Results'       => '/coordinator/results.php',
         'Documents'     => '/coordinator/documents.php',
+        'Reports'       => '/coordinator/reports.php',
         'Periods'       => '/coordinator/periods.php',
     ],
     'lecturer'    => [
@@ -38,6 +44,7 @@ $menus = [
         'My logbook'      => '/student/logbook.php',
         'My documents'    => '/student/documents.php',
         'My results'      => '/student/results.php',
+        'My profile'      => '/student/profile.php',
     ],
 ];
 $current_path = substr(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), strlen(BASE_URL));
@@ -72,11 +79,11 @@ $current_path = substr(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), strlen(
                     </li>
                 <?php endforeach; ?>
             </ul>
-            <span class="navbar-text text-white-50 me-3 small">
+            <a class="navbar-text text-white-50 me-3 small text-decoration-none text-nowrap" href="<?= BASE_URL ?>/account.php"
+               title="<?= e(ROLE_LABEL[$role]) ?> · My account (change password)">
                 <i class="bi bi-person-circle me-1"></i><?= e($_SESSION['full_name']) ?>
-                · <?= e(ROLE_LABEL[$role]) ?>
-            </span>
-            <a class="btn btn-outline-light btn-sm" href="<?= BASE_URL ?>/logout.php">
+            </a>
+            <a class="btn btn-outline-light btn-sm text-nowrap" href="<?= BASE_URL ?>/logout.php">
                 <i class="bi bi-box-arrow-right me-1"></i>Log out
             </a>
         </div>
