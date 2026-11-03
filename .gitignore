@@ -1,0 +1,12 @@
+# Local settings with the database password (copy config.example.php instead)
+config/config.php
+
+# Files uploaded by users are data, not code
+uploads/*
+!uploads/.htaccess
+
+# Editor and system files
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

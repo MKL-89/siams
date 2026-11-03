@@ -1,0 +1,77 @@
+<?php
+/**
+ * Login page (FR-01). Checks the email and password, then sends each user
+ * to the dashboard for their role.
+ */
+require_once __DIR__ . '/includes/auth.php';
+start_secure_session();
+
+// Already logged in: go straight to the dashboard.
+if (!empty($_SESSION['user_id'])) {
+    redirect(ROLE_HOME[current_role()]);
+}
+
+$error = null;
+$email = '';
+$flash = $_SESSION['flash'] ?? null;
+unset($_SESSION['flash']);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email    = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if (!csrf_valid()) {
+        $error = 'Your form expired. Please try again.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') {
+        $error = 'Please enter a valid email address and your password.';
+    } else {
+        $error = attempt_login($email, $password);
+        if ($error === null) {
+            redirect(ROLE_HOME[current_role()]);
+        }
+    }
+}
+
+$page_title = 'Log in';
+require __DIR__ . '/includes/header.php';
+?>
+<div class="login-wrapper">
+    <div class="card shadow-sm login-card">
+        <div class="card-body p-4">
+            <div class="text-center mb-4">
+                <div class="login-logo"><i class="bi bi-briefcase-fill"></i></div>
+                <h1 class="h4 mb-1"><?= APP_NAME ?></h1>
+                <p class="text-muted small mb-0"><?= e(APP_FULL_NAME) ?></p>
+                <p class="text-muted small"><?= e(INSTITUTION) ?></p>
+            </div>
+
+            <?php if ($flash): ?>
+                <div class="alert alert-info py-2 small"><?= e($flash) ?></div>
+            <?php endif; ?>
+            <?php if ($error): ?>
+                <div class="alert alert-danger py-2 small" role="alert"><?= e($error) ?></div>
+            <?php endif; ?>
+
+            <form method="post" novalidate>
+                <?= csrf_field() ?>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="email" name="email"
+                           value="<?= e($email) ?>" required autofocus autocomplete="username">
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password"
+                           required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-siams w-100">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Log in
+                </button>
+            </form>
+            <p class="text-center small text-muted mt-3 mb-0">
+                Host organization? <a href="<?= BASE_URL ?>/register_host.php">Register to post opportunities</a>
+            </p>
+        </div>
+    </div>
+</div>
+<?php require __DIR__ . '/includes/footer.php'; ?>
