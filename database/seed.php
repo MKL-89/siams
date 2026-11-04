@@ -11,7 +11,8 @@ if (PHP_SAPI !== 'cli') {
 require_once __DIR__ . '/../config/db.php';
 
 // All test accounts share this password. Listed in database/TEST_ACCOUNTS.md.
-const TEST_PASSWORD = 'Siams@2026';
+require_once __DIR__ . '/test_password.php';
+require_once __DIR__ . '/sample_opportunities.php';
 
 $pdo  = db();
 $hash = password_hash(TEST_PASSWORD, PASSWORD_DEFAULT);
@@ -64,6 +65,9 @@ $opp->execute([$org1, 'ICT Support Attachment',
     "Assist the ICT team with computer maintenance, user support and network troubleshooting.\nSkills: basic networking, Windows, good communication.", 3]);
 $opp->execute([$org1, 'Web Development Attachment',
     "Work with the development team on the company website and internal web tools.\nSkills: HTML, CSS, PHP and MySQL.", 2]);
+
+// A larger set of fictitious organizations and opportunities.
+add_sample_opportunities($pdo, $hash);
 
 $pdo->commit();
 echo "Test data added. Password for every test account: see database/TEST_ACCOUNTS.md\n";

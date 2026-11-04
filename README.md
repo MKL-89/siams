@@ -38,8 +38,9 @@ A web-based system that manages the full industrial attachment cycle for the Sch
 ## Features
 
 - **Secure login** with role-based access for five user groups, account lockout after repeated failed attempts, and automatic logout after inactivity.
+- **Student account creation**: students create their own account from the login page with their registration number; the coordinator approves it before the student can log in.
 - **Host organization registration**: organizations sign up online and are approved or rejected by the coordinator.
-- **Attachment opportunities**: organizations post vacancies; students search and filter them by keyword, sector and county.
+- **Attachment opportunities**: organizations post vacancies; students search and filter them by keyword, sector and county, sort them (closing soonest, newest, title) and browse them 12 per page.
 - **Applications and placements**: students apply, organizations accept applicants, and the coordinator approves the placement.
 - **Supervisor assignment**: the coordinator assigns a university supervisor to each placed student, and supervisors record visits.
 - **Electronic logbook**: students write weekly entries, and the industrial supervisor confirms them.
@@ -55,10 +56,10 @@ A web-based system that manages the full industrial attachment cycle for the Sch
 | Role | Main tasks |
 |---|---|
 | **Administrator** | Creates and deactivates user accounts, resets passwords, views the activity log, downloads database backups. |
-| **Attachment Coordinator** (Office of Industrial Linkages & Attachment) | Approves organizations, manages attachment periods, approves placements, assigns university supervisors, views results and documents, produces reports. |
+| **Attachment Coordinator** (Office of Industrial Linkages & Attachment) | Approves student accounts and organizations, manages attachment periods, approves placements, assigns university supervisors, views results and documents, produces reports. |
 | **University Supervisor** (lecturer) | Views assigned students, records supervision visits, reads logbooks, submits the university assessment. |
 | **Industrial Supervisor** (host organization) | Posts opportunities, accepts or rejects applicants, confirms logbook entries, submits the industrial assessment. |
-| **Student** | Searches and applies for opportunities, tracks applications, keeps the weekly logbook, uploads documents, views results. |
+| **Student** | Creates an account, searches and applies for opportunities, tracks applications, keeps the weekly logbook, uploads documents, views results. |
 
 Every user can change their own password under **My account** (click your name in the menu bar).
 
@@ -102,6 +103,7 @@ The application connects to the database with its own limited account (`siams_ap
 siams/
 ├── index.php              Sends each user to their role's dashboard
 ├── login.php / logout.php Login and logout
+├── register.php           Public "Create a student account" form (approved by the coordinator)
 ├── register_host.php      Public registration form for host organizations
 ├── account.php            "My account": profile and password change for every user
 ├── download.php           Serves uploaded files after an access check
@@ -131,6 +133,8 @@ siams/
 ├── database/              Not reachable from the browser
 │   ├── setup.sql          Creates the database, the app account and all 17 tables
 │   ├── seed.php           Adds fictitious test accounts and sample data
+│   ├── sample_opportunities.php  Adds 14 fictitious organizations and 32 opportunities (run by seed.php)
+│   ├── test_password.php  Shared password for the test accounts
 │   └── TEST_ACCOUNTS.md   Test logins for development
 │
 ├── uploads/               Uploaded PDFs — not reachable directly; served through download.php
@@ -167,7 +171,7 @@ siams/
 
 4. **Create the settings file.** Copy `config\config.example.php` to `config\config.php` and set `DB_PASS` to the password given to `siams_app` in `database\setup.sql`.
 
-5. **Add the test data** (fictitious accounts, two organizations, an attachment period and two opportunities):
+5. **Add the test data** (fictitious accounts, 16 organizations, an attachment period and 34 opportunities):
    ```bash
    C:\xampp\php\php.exe C:\xampp\htdocs\siams\database\seed.php
    ```
@@ -301,7 +305,8 @@ The system was tested with automated scripts that send real requests to the runn
 | 6. Assessments and final mark | 18 |
 | 7. Document uploads | 21 |
 | 8. Reports and administration | 33 |
-| **Total** | **176 — all passed (final run, 4 November 2026)** |
+| 9. Student account creation and opportunity browsing | 34 |
+| **Total** | **210 — all passed (final run, 4 November 2026)** |
 
 On the development computer, pages responded in 6–23 ms on average, and 50 simultaneous requests all succeeded within 500 ms. Full results, test cases and the defects found and fixed are in Chapter Four of the project report.
 
@@ -328,7 +333,7 @@ Before putting SIAMS on a real server:
 
 1. Use a host with **PHP 8.1+**, **MySQL/MariaDB** and **HTTPS**.
 2. Create the database and a database user with a **new, strong password**; update `setup.sql` (or create the user in the hosting control panel) and `config/config.php`.
-3. **Do not run `seed.php`.** Remove `database/TEST_ACCOUNTS.md` and any test accounts.
+3. **Do not run `seed.php` or `sample_opportunities.php`.** Remove `database/TEST_ACCOUNTS.md`, `database/test_password.php` and any test accounts.
 4. Create the first administrator account, then create the other users from the admin pages.
 5. Make sure the host honours `.htaccess` files (Apache), or block `config/`, `includes/`, `database/` and `uploads/` in the server configuration.
 6. Set `BASE_URL` in `config/config.php` if the system is not served from `/siams`.

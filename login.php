@@ -68,7 +68,12 @@ require __DIR__ . '/includes/header.php';
                     <i class="bi bi-box-arrow-in-right me-1"></i>Log in
                 </button>
             </form>
-            <p class="text-center small text-muted mt-3 mb-0">
+            <hr class="my-4">
+            <p class="text-center small text-muted mb-2">Don't have an account?</p>
+            <a class="btn btn-outline-primary w-100 mb-2" href="<?= BASE_URL ?>/register.php">
+                <i class="bi bi-person-plus me-1"></i>Create a student account
+            </a>
+            <p class="text-center small text-muted mb-0">
                 Host organization? <a href="<?= BASE_URL ?>/register_host.php">Register to post opportunities</a>
             </p>
         </div>

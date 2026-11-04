@@ -26,23 +26,49 @@ if (in_array($sector, SECTORS, true)) {
     $sql .= ' AND o.sector = ?';
     $params[] = $sector;
 }
-$sql .= ' ORDER BY op.deadline ASC';
+// Sort order and page (12 opportunities per page).
+$sorts = [
+    'deadline' => 'op.deadline ASC, op.title',
+    'newest'   => 'op.created_at DESC, op.opportunity_id DESC',
+    'title'    => 'op.title ASC',
+];
+$sort  = array_key_exists($_GET['sort'] ?? '', $sorts) ? $_GET['sort'] : 'deadline';
+$count = db()->prepare('SELECT COUNT(*) FROM (' . $sql . ') AS found');
+$count->execute($params);
+$total   = (int) $count->fetchColumn();
+$perPage = 12;
+$pages   = max(1, (int) ceil($total / $perPage));
+$page    = min($pages, max(1, (int) ($_GET['page'] ?? 1)));
+$sql .= ' ORDER BY ' . $sorts[$sort] . ' LIMIT ' . $perPage . ' OFFSET ' . (($page - 1) * $perPage);
 $stmt = db()->prepare($sql);
 $stmt->execute($params);
 $opps = $stmt->fetchAll();
+
+/** Link to another page of results, keeping the current search. */
+function page_url(int $p): string
+{
+    return '?' . http_build_query(array_merge($_GET, ['page' => $p]));
+}
 
 $page_title = 'Find opportunities';
 require __DIR__ . '/../includes/header.php';
 ?>
 <h1 class="h3 mb-3">Attachment opportunities</h1>
 <form class="row g-2 mb-4" method="get">
-    <div class="col-md-5"><input class="form-control" name="q" placeholder="Search by keyword or organization" value="<?= e($q) ?>"></div>
-    <div class="col-md-3"><select class="form-select" name="county"><?= options(COUNTIES, $county, 'All counties') ?></select></div>
+    <div class="col-md-4"><input class="form-control" name="q" placeholder="Search by keyword or organization" value="<?= e($q) ?>"></div>
+    <div class="col-md-2"><select class="form-select" name="county"><?= options(COUNTIES, $county, 'All counties') ?></select></div>
     <div class="col-md-2"><select class="form-select" name="sector"><?= options(SECTORS, $sector, 'All sectors') ?></select></div>
+    <div class="col-md-2">
+        <select class="form-select" name="sort" aria-label="Sort by">
+            <?php foreach (['deadline' => 'Closing soonest', 'newest' => 'Newest first', 'title' => 'Title A–Z'] as $k => $label): ?>
+                <option value="<?= $k ?>"<?= $sort === $k ? ' selected' : '' ?>><?= $label ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
     <div class="col-md-2"><button class="btn btn-siams w-100"><i class="bi bi-search me-1"></i>Search</button></div>
 </form>
 
-<p class="text-muted small"><?= count($opps) ?> open opportunit<?= count($opps) === 1 ? 'y' : 'ies' ?> found.</p>
+<p class="text-muted small"><?= $total ?> open opportunit<?= $total === 1 ? 'y' : 'ies' ?> found<?= $pages > 1 ? ' · page ' . $page . ' of ' . $pages : '' ?>.</p>
 <div class="row g-3">
     <?php if (!$opps): ?>
         <div class="col-12"><div class="alert alert-light border">No open opportunities match your search.</div></div>
@@ -67,4 +93,15 @@ require __DIR__ . '/../includes/header.php';
         </div>
     <?php endforeach; ?>
 </div>
+<?php if ($pages > 1): ?>
+    <nav class="mt-4" aria-label="Opportunity pages">
+        <ul class="pagination justify-content-center flex-wrap">
+            <li class="page-item<?= $page === 1 ? ' disabled' : '' ?>"><a class="page-link" href="<?= e(page_url($page - 1)) ?>">Previous</a></li>
+            <?php for ($p = 1; $p <= $pages; $p++): ?>
+                <li class="page-item<?= $p === $page ? ' active' : '' ?>"><a class="page-link" href="<?= e(page_url($p)) ?>"><?= $p ?></a></li>
+            <?php endfor; ?>
+            <li class="page-item<?= $page === $pages ? ' disabled' : '' ?>"><a class="page-link" href="<?= e(page_url($page + 1)) ?>">Next</a></li>
+        </ul>
+    </nav>
+<?php endif; ?>
 <?php require __DIR__ . '/../includes/footer.php'; ?>
