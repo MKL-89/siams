@@ -138,7 +138,8 @@ siams/
 │   ├── helpers.php        Escaping, flash messages, audit logging, validation, county and sector lists
 │   ├── header.php / footer.php   Page layout, role menus and the visitor menu
 │   ├── opportunities.php  Opportunity rules and the shared search (public and student pages)
-│   ├── opportunity_list.php      Search form, cards and page links used by both opportunity lists
+│   ├── opportunity_list.php      Search banner, opportunity cards and page links used by both opportunity lists
+│   ├── opportunity_detail.php    Banner, details and deadline cards used by both opportunity pages
 │   ├── placements.php     Placement and application rules
 │   ├── logbook.php        Logbook rules
 │   ├── assessment.php     Scores and final-mark calculation

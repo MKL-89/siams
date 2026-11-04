@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/opportunities.php';
 require_once __DIR__ . '/../includes/placements.php';
+require_once __DIR__ . '/../includes/opportunity_detail.php';
 require_role('student');
 
 $oppId = (int) ($_GET['id'] ?? 0);
@@ -36,36 +37,29 @@ $reason = cannot_apply_reason($studentId, $op);
 $page_title = $op['title'];
 require __DIR__ . '/../includes/header.php';
 ?>
-<a href="opportunities.php" class="small"><i class="bi bi-arrow-left me-1"></i>Back to opportunities</a>
+<?php opportunity_hero($op, 'opportunities.php'); ?>
 <?php show_flash(); ?>
-<div class="card shadow-sm mt-2">
-    <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start">
-            <div>
-                <h1 class="h3 mb-1"><?= e($op['title']) ?></h1>
-                <p class="text-muted mb-3"><?= e($op['org_name']) ?> · <?= e($op['sector']) ?></p>
-            </div>
-            <?= is_accepting($op) ? status_badge('open') : status_badge('closed') ?>
-        </div>
-        <div class="row mb-3 small">
-            <div class="col-sm-4"><strong>Location:</strong> <?= e($op['address']) ?>, <?= e($op['county']) ?></div>
-            <div class="col-sm-4"><strong>Slots:</strong> <?= (int) $op['slots'] ?></div>
-            <div class="col-sm-4"><strong>Apply by:</strong> <?= nice_date($op['deadline']) ?></div>
-        </div>
-        <h2 class="h6">Description</h2>
-        <p style="white-space: pre-line"><?= e($op['description']) ?></p>
-        <h2 class="h6">Contact</h2>
-        <p class="small mb-0"><?= e($op['contact_email']) ?> · <?= e($op['contact_phone']) ?></p>
+<div class="row g-4">
+    <div class="col-lg-8">
+        <?php opportunity_details($op, true); ?>
     </div>
-    <div class="card-footer bg-white">
-        <?php if ($reason === null): ?>
-            <form method="post" onsubmit="return confirm('Send your application for this opportunity?');">
-                <?= csrf_field() ?>
-                <button class="btn btn-siams"><i class="bi bi-send me-1"></i>Apply for this opportunity</button>
-            </form>
-        <?php else: ?>
-            <span class="text-muted small"><i class="bi bi-info-circle me-1"></i><?= e($reason) ?></span>
-        <?php endif; ?>
+    <div class="col-lg-4">
+        <div class="card apply-card">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold">Apply for this opportunity</h2>
+                <?php if ($reason === null): ?>
+                    <p class="small text-muted">Your application goes straight to <?= e($op['org_name']) ?>. You can follow it under My applications.</p>
+                    <form method="post" onsubmit="return confirm('Send your application for this opportunity?');">
+                        <?= csrf_field() ?>
+                        <button class="btn btn-siams w-100"><i class="bi bi-send me-1"></i>Apply for this opportunity</button>
+                    </form>
+                <?php else: ?>
+                    <p class="small text-muted mb-0"><i class="bi bi-info-circle me-1"></i><?= e($reason) ?></p>
+                <?php endif; ?>
+                <hr>
+                <a class="small" href="applications.php"><i class="bi bi-send me-1"></i>My applications</a>
+            </div>
+        </div>
     </div>
 </div>
 <?php require __DIR__ . '/../includes/footer.php'; ?>

@@ -5,6 +5,7 @@
  */
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/opportunities.php';
+require_once __DIR__ . '/includes/opportunity_detail.php';
 start_secure_session();
 
 $oppId = (int) ($_GET['id'] ?? 0);
@@ -31,32 +32,15 @@ if (!$op || !is_accepting($op)) {
 $page_title = $op['title'];
 require __DIR__ . '/includes/header.php';
 ?>
-<a href="<?= BASE_URL ?>/opportunities.php" class="small"><i class="bi bi-arrow-left me-1"></i>Back to opportunities</a>
-<div class="row g-4 mt-1">
+<?php opportunity_hero($op, BASE_URL . '/opportunities.php'); ?>
+<div class="row g-4">
     <div class="col-lg-8">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start gap-2">
-                    <div>
-                        <h1 class="h3 mb-1"><?= e($op['title']) ?></h1>
-                        <p class="text-muted mb-3"><i class="bi bi-building me-1"></i><?= e($op['org_name']) ?> · <?= e($op['sector']) ?></p>
-                    </div>
-                    <?= status_badge('open') ?>
-                </div>
-                <div class="row mb-3 small g-2">
-                    <div class="col-sm-4"><i class="bi bi-geo-alt me-1"></i><strong>Location:</strong> <?= e($op['address']) ?>, <?= e($op['county']) ?></div>
-                    <div class="col-sm-4"><i class="bi bi-people me-1"></i><strong>Slots:</strong> <?= (int) $op['slots'] ?></div>
-                    <div class="col-sm-4 text-danger"><i class="bi bi-calendar-event me-1"></i><strong>Apply by:</strong> <?= nice_date($op['deadline']) ?></div>
-                </div>
-                <h2 class="h6">Description</h2>
-                <p class="mb-0" style="white-space: pre-line"><?= e($op['description']) ?></p>
-            </div>
-        </div>
+        <?php opportunity_details($op, false); ?>
     </div>
     <div class="col-lg-4">
-        <div class="card shadow-sm border-0 apply-card">
-            <div class="card-body">
-                <h2 class="h5">Apply for this opportunity</h2>
+        <div class="card apply-card">
+            <div class="card-body p-4">
+                <h2 class="h5 fw-bold">Apply for this opportunity</h2>
                 <?php if (!current_role()): ?>
                     <p class="small text-muted">You need a student account to apply. Log in, or create an account if you do not have one yet.</p>
                     <a class="btn btn-siams w-100 mb-2" href="<?= BASE_URL ?>/login.php?apply=<?= $oppId ?>">

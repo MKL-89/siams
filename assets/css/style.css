@@ -95,3 +95,33 @@ main h1.h3 { font-weight: 700; color: #16243a; }
 .opportunity-card { transition: box-shadow .15s ease, transform .15s ease; }
 .opportunity-card:hover { box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .1) !important; transform: translateY(-2px); }
 @media (prefers-reduced-motion: reduce) { .opportunity-card, .opportunity-card:hover { transition: none; transform: none; } }
+
+/* ---------- Attachment opportunities ---------- */
+.opp-hero { background: linear-gradient(135deg, var(--siams-primary-dark) 0%, var(--siams-primary) 60%, #1673b8 100%);
+    padding: 1.75rem 1.75rem 1.5rem; position: relative; overflow: hidden; }
+.opp-hero::after { content: ""; position: absolute; right: -70px; top: -90px; width: 260px; height: 260px;
+    border-radius: 50%; background: rgba(255, 255, 255, .07); }
+.opp-search .input-group-text { background: #fff; border-color: transparent; color: #6c7a8d; }
+.opp-search .form-control, .opp-search .form-select { border-color: transparent; }
+.opp-search .input-group { border-radius: .55rem; overflow: hidden; box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .12); }
+.opp-card { border: 0; }
+.opp-card .card-title { font-size: 1.05rem; font-weight: 700; color: #16243a; line-height: 1.3; }
+.opp-card:hover .card-title { color: var(--siams-primary); }
+.min-w-0 { min-width: 0; }
+.org-badge { flex: 0 0 2.9rem; width: 2.9rem; height: 2.9rem; border-radius: .75rem; display: flex; align-items: center;
+    justify-content: center; font-weight: 700; font-size: .95rem; letter-spacing: .02em; }
+.org-badge-0 { background: #e7f0f9; color: #0b4f8a; }
+.org-badge-1 { background: #e5f4e4; color: #1e6b33; }
+.org-badge-2 { background: #fdf3d8; color: #8a5a00; }
+.org-badge-3 { background: #efedff; color: #4b3fb0; }
+.org-badge-4 { background: #fbebeb; color: #a3262b; }
+.org-badge-5 { background: #e3f5f6; color: #0f6a72; }
+.opp-chip { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .6rem; border-radius: 50rem;
+    background: #f1f4f8; color: #44546a; font-size: .78rem; font-weight: 500; }
+.opp-chip-new { background: #e5f4e4; color: #1e6b33; font-weight: 700; }
+.opp-desc { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.opp-date { font-size: .75rem; font-weight: 400; color: #6c7a8d; }
+.org-badge-lg { flex: 0 0 4rem; width: 4rem; height: 4rem; border-radius: 1rem; font-size: 1.3rem;
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .15); }
+.opp-chip-hero { background: rgba(255, 255, 255, .16); color: #fff; border: 1px solid rgba(255, 255, 255, .22); }
+.apply-card { border: 0; border-top: 4px solid var(--siams-primary); position: sticky; top: 1rem; }
