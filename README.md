@@ -70,9 +70,11 @@ Click your name in the menu bar for **My account** (change password), **Use anot
 ### Using several accounts at once
 
 1. Log in as the first user, for example a student.
-2. Open a new tab, click your name → **Use another account** (or open the login page), and log in as the second user.
+2. Click your name → **Use another account (new tab)**, or open a new tab and type the address, and log in as the second user.
 3. The second account opens at `http://localhost/siams/u/1/…` in its own session. The first account stays logged in at `http://localhost/siams/…`.
-4. Logging out ends only the account of that tab. Tabs that show the same account share its session, so logging out of that account logs out all of its tabs.
+4. Logging out ends only the account of that tab. Tabs that show the same account share its session, so logging out of that account logs out all of its tabs; those tabs refresh at once to show the login page.
+
+A tab opened by typing the address (or from a bookmark) gets its own login session if another open tab already uses that account. Links opened in a new tab from a SIAMS page keep the same account.
 
 Up to 10 accounts can be logged in at once in one browser.
 

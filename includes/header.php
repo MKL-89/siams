@@ -57,9 +57,9 @@ $current_path = substr(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), strlen(
     <title><?= e($page_title) ?> | <?= APP_NAME ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link href="<?= BASE_URL ?>/assets/css/style.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>/assets/css/style.css?v=<?= filemtime(__DIR__ . "/../assets/css/style.css") ?>" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body class="bg-light" data-base="<?= e(BASE_PATH) ?>" data-slot="<?= current_slot() ?>" data-auth="<?= $role ? '1' : '' ?>" data-uid="<?= (int) ($_SESSION['user_id'] ?? 0) ?>">
 <?php if ($role): ?>
 <nav class="navbar navbar-expand-lg navbar-dark bg-siams">
     <div class="container-fluid">
@@ -87,7 +87,8 @@ $current_path = substr(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), strlen(
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li><span class="dropdown-item-text small text-muted"><?= e(ROLE_LABEL[$role]) ?></span></li>
                     <li><a class="dropdown-item" href="<?= BASE_URL ?>/account.php"><i class="bi bi-key me-2"></i>My account (change password)</a></li>
-                    <li><a class="dropdown-item" href="<?= BASE_URL ?>/login.php"><i class="bi bi-person-plus me-2"></i>Use another account</a></li>
+                    <li><a class="dropdown-item" href="<?= BASE_URL ?>/login.php" target="_blank" rel="noopener"
+                           title="Opens a new tab where you can log in with another account; this tab keeps its account"><i class="bi bi-person-plus me-2"></i>Use another account (new tab)</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="<?= BASE_URL ?>/logout.php"><i class="bi bi-box-arrow-right me-2"></i>Log out</a></li>
                 </ul>

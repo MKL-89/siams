@@ -77,12 +77,6 @@ require __DIR__ . '/includes/header.php';
         <h1 class="h3 mb-1">Register your organization</h1>
         <p class="text-muted">Host organizations can register to post attachment opportunities for students.
             Your account is ready as soon as you register, and the opportunities you post are shown to students straight away.</p>
-        <?php if ($loggedInAs): ?>
-            <div class="alert alert-secondary small">
-                <i class="bi bi-people me-1"></i>You are logged in as <strong><?= e($loggedInAs) ?></strong>.
-                The new account opens in its own session, and this account stays logged in in your other tabs.
-            </div>
-        <?php endif; ?>
 
             <?php show_errors($errors); ?>
             <form method="post" class="card shadow-sm" novalidate>

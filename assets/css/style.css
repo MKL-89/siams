@@ -20,10 +20,65 @@
     .card { border: 0 !important; box-shadow: none !important; }
 }
 
+/* ---------- Pages after login: same look as the home page ---------- */
+body.bg-light { background-color: #f3f6fa !important; }
+.navbar.bg-siams { box-shadow: 0 2px 8px rgba(8, 59, 104, .25); }
+.navbar .dropdown-menu { border: 0; border-radius: .75rem; box-shadow: 0 .5rem 1.5rem rgba(16, 40, 70, .15); }
+
+/* Cards, tables and forms */
+.card { border-color: #e4eaf2; border-radius: .9rem; }
+.card.shadow-sm, .card { box-shadow: 0 .125rem .5rem rgba(16, 40, 70, .06); }
+.card > .card-footer:last-child { border-radius: 0 0 .9rem .9rem; }
+.card > .table-responsive:first-child, .card > .table-responsive:first-child .table { border-radius: .9rem; }
+.table { margin-bottom: 0; }
+.table > :not(caption) > * > * { padding: .75rem .9rem; }
+.table thead th, .table-light th { background-color: #eef3f9 !important; color: #3b4a5e; font-size: .82rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .03em; border-bottom: 1px solid #dce5ef; }
+.table-hover > tbody > tr:hover > * { background-color: #f6f9fd; }
+main h1.h3 { font-weight: 700; color: #16243a; }
+.form-control, .form-select { border-radius: .55rem; border-color: #d3dce7; }
+.form-control:focus, .form-select:focus { border-color: #6aa3d6; box-shadow: 0 0 0 .2rem rgba(11, 79, 138, .15); }
+.btn { border-radius: .55rem; }
+.badge { font-weight: 600; padding: .4em .7em; border-radius: 50rem; }
+.alert { border-radius: .75rem; border: 0; }
+.pagination .page-link { border-radius: .5rem; margin: 0 .15rem; color: var(--siams-primary); }
+.pagination .page-item.active .page-link { background-color: var(--siams-primary); border-color: var(--siams-primary); }
+
+/* Dashboard welcome banner */
+.dash-hero { background: linear-gradient(135deg, var(--siams-primary-dark) 0%, var(--siams-primary) 60%, #1673b8 100%);
+    padding: 2rem 2rem; position: relative; overflow: hidden; }
+.dash-hero::after { content: ""; position: absolute; right: -60px; top: -60px; width: 220px; height: 220px;
+    border-radius: 50%; background: rgba(255, 255, 255, .07); }
+.dash-hero-icon { width: 4.5rem; height: 4.5rem; border-radius: 50%; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .2); font-size: 2rem; }
+
 /* Dashboard summary cards */
-.stat-card { border: 0; border-left: 4px solid var(--siams-primary); }
-.stat-card .stat-value { font-size: 1.8rem; font-weight: 600; color: var(--siams-primary); }
-.stat-card .stat-icon { font-size: 2rem; color: var(--siams-primary); opacity: .35; }
+.stat-card { border: 0; color: inherit; text-decoration: none; }
+.stat-card .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--siams-primary); line-height: 1.1; }
+.stat-icon-wrap { flex: 0 0 3rem; width: 3rem; height: 3rem; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; background: #e7f0f9; color: var(--siams-primary); font-size: 1.35rem; }
+.stat-card-link, .action-card { transition: box-shadow .15s ease, transform .15s ease; }
+.stat-card-link:hover, .action-card:hover { box-shadow: 0 .5rem 1rem rgba(16, 40, 70, .12); transform: translateY(-2px); color: inherit; }
+.action-card { border: 0; }
+.action-card:hover h3 { color: var(--siams-primary); }
+
+/* "What to do next" panel */
+.next-step { border: 0; border-left: 5px solid #0d6efd; }
+.next-step-icon { flex: 0 0 2.75rem; width: 2.75rem; height: 2.75rem; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 1.25rem; background: #e7f1fb; color: #0b5ed7; }
+.next-step-success { border-left-color: #198754; }
+.next-step-success .next-step-icon { background: #e5f4e4; color: #157347; }
+.next-step-warning { border-left-color: #e0a100; }
+.next-step-warning .next-step-icon { background: #fdf3d8; color: #996c00; }
+
+/* Login page background, like the home page banner */
+.auth-backdrop { background: linear-gradient(135deg, var(--siams-primary-dark) 0%, var(--siams-primary) 60%, #1673b8 100%);
+    min-height: calc(100vh - 56px - 52px); padding: 3rem 1rem; }
+.auth-backdrop .login-card { box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, .25) !important; border-radius: 1rem; }
+
+@media (prefers-reduced-motion: reduce) {
+    .stat-card-link, .action-card, .stat-card-link:hover, .action-card:hover { transition: none; transform: none; }
+}
 
 /* Public landing page */
 .text-siams { color: var(--siams-primary) !important; }

@@ -111,13 +111,6 @@ require __DIR__ . '/includes/header.php';
             find attachment opportunities, apply online and keep their logbook. Your account is ready to use as soon
             as you create it.</p>
 
-            <?php if ($loggedInAs): ?>
-                <div class="alert alert-secondary small">
-                    <i class="bi bi-people me-1"></i>You are logged in as <strong><?= e($loggedInAs) ?></strong>.
-                    A new account opens in its own session, and this account stays logged in in your other tabs.
-                </div>
-            <?php endif; ?>
-
             <?php if ($applyTitle): ?>
                 <div class="alert alert-primary small">
                     <i class="bi bi-send me-1"></i>Create your account to apply for <strong><?= e($applyTitle) ?></strong>.

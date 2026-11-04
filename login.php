@@ -8,8 +8,6 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/opportunities.php';
 start_secure_session();
 
-$loggedInAs = !empty($_SESSION['user_id']) ? $_SESSION['full_name'] . ' (' . ROLE_LABEL[current_role()] . ')' : null;
-
 // "Log in to apply": remember the opportunity so the student returns to it after logging in.
 // Only an opportunity id is stored (never a URL), so this cannot redirect anywhere else.
 if (isset($_GET['apply'])) {
@@ -52,9 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $page_title = 'Log in';
+$full_width = true;
 require __DIR__ . '/includes/header.php';
 ?>
-<div class="login-wrapper">
+<div class="login-wrapper auth-backdrop">
     <div class="card shadow-sm login-card">
         <div class="card-body p-4">
             <div class="text-center mb-4">
@@ -66,14 +65,6 @@ require __DIR__ . '/includes/header.php';
 
             <?php if ($flash): ?>
                 <div class="alert alert-info py-2 small"><?= e($flash) ?></div>
-            <?php endif; ?>
-            <?php if ($loggedInAs): ?>
-                <div class="alert alert-secondary py-2 small">
-                    <i class="bi bi-people me-1"></i>You are logged in as <strong><?= e($loggedInAs) ?></strong>.
-                    <a href="<?= BASE_URL . ROLE_HOME[current_role()] ?>">Back to my dashboard</a>.<br>
-                    To use another account at the same time, log in below. It opens in its own session,
-                    and this account stays logged in in your other tabs.
-                </div>
             <?php endif; ?>
             <?php if ($applyTitle): ?>
                 <div class="alert alert-primary py-2 small">
