@@ -79,13 +79,19 @@ $current_path = substr(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), strlen(
                     </li>
                 <?php endforeach; ?>
             </ul>
-            <a class="navbar-text text-white-50 me-3 small text-decoration-none text-nowrap" href="<?= BASE_URL ?>/account.php"
-               title="<?= e(ROLE_LABEL[$role]) ?> · My account (change password)">
-                <i class="bi bi-person-circle me-1"></i><?= e($_SESSION['full_name']) ?>
-            </a>
-            <a class="btn btn-outline-light btn-sm text-nowrap" href="<?= BASE_URL ?>/logout.php">
-                <i class="bi bi-box-arrow-right me-1"></i>Log out
-            </a>
+            <div class="dropdown">
+                <button class="btn btn-outline-light btn-sm dropdown-toggle text-nowrap" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false" title="<?= e(ROLE_LABEL[$role]) ?>">
+                    <i class="bi bi-person-circle me-1"></i><?= e($_SESSION['full_name']) ?>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><span class="dropdown-item-text small text-muted"><?= e(ROLE_LABEL[$role]) ?></span></li>
+                    <li><a class="dropdown-item" href="<?= BASE_URL ?>/account.php"><i class="bi bi-key me-2"></i>My account (change password)</a></li>
+                    <li><a class="dropdown-item" href="<?= BASE_URL ?>/login.php"><i class="bi bi-person-plus me-2"></i>Use another account</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="<?= BASE_URL ?>/logout.php"><i class="bi bi-box-arrow-right me-2"></i>Log out</a></li>
+                </ul>
+            </div>
         </div>
     </div>
 </nav>

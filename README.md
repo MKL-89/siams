@@ -43,6 +43,7 @@ A web-based system that manages the full industrial attachment cycle for the Sch
 - **Student account creation**: students create their own account with their registration number. The account is active at once and the student is logged in straight away.
 - **Host organization registration**: organizations sign up online and can post opportunities immediately; students see them straight away. The coordinator can still reject an organization, and the administrator can deactivate any account.
 - **Show password**: every password field has an eye button to show or hide what was typed.
+- **Several accounts in one browser**: different users can be logged in at the same time in different tabs (for example a student in one tab and the coordinator in another). Each extra account gets its own session and address (`/siams/u/1/…`, `/siams/u/2/…`, up to 9), so logging out in one tab does not log out the others.
 - **Attachment opportunities**: organizations post vacancies; students search and filter them by keyword, sector and county, sort them (closing soonest, newest, title) and browse them 12 per page.
 - **Applications and placements**: students apply, organizations accept applicants, and the coordinator approves the placement.
 - **Supervisor assignment**: the coordinator assigns a university supervisor to each placed student, and supervisors record visits.
@@ -64,7 +65,16 @@ A web-based system that manages the full industrial attachment cycle for the Sch
 | **Industrial Supervisor** (host organization) | Posts opportunities, accepts or rejects applicants, confirms logbook entries, submits the industrial assessment. |
 | **Student** | Creates an account, searches and applies for opportunities, tracks applications, keeps the weekly logbook, uploads documents, views results. |
 
-Every user can change their own password under **My account** (click your name in the menu bar).
+Click your name in the menu bar for **My account** (change password), **Use another account** and **Log out**.
+
+### Using several accounts at once
+
+1. Log in as the first user, for example a student.
+2. Open a new tab, click your name → **Use another account** (or open the login page), and log in as the second user.
+3. The second account opens at `http://localhost/siams/u/1/…` in its own session. The first account stays logged in at `http://localhost/siams/…`.
+4. Logging out ends only the account of that tab. Tabs that show the same account share its session, so logging out of that account logs out all of its tabs.
+
+Up to 10 accounts can be logged in at once in one browser.
 
 ---
 
@@ -107,7 +117,8 @@ siams/
 ├── index.php              Public landing page (logged-in users go to their dashboard)
 ├── opportunities.php      Public list of open opportunities (search, filters, pages)
 ├── opportunity.php        Public details of one opportunity, with "Log in to apply"
-├── login.php / logout.php Login and logout
+├── login.php / logout.php Login and logout (logout ends only that tab's account)
+├── .htaccess              Maps /siams/u/1/… to /siams/u/9/… to the same pages, one login session each
 ├── register.php           Public "Create a student account" form (account active at once)
 ├── register_host.php      Public registration form for host organizations
 ├── account.php            "My account": profile and password change for every user
@@ -238,7 +249,7 @@ Settings live in `config/config.php` (copied from `config/config.example.php`):
 | `DB_NAME` | `siams_db` | Database name |
 | `DB_USER` | `siams_app` | Limited database account used by the app |
 | `DB_PASS` | — | Password for `DB_USER` |
-| `BASE_URL` | `/siams` | Path the system is served from |
+| `BASE_PATH` | `/siams` | Path the system is served from (extra accounts use `BASE_PATH/u/1` … `/u/9`) |
 | `MAX_LOGIN_ATTEMPTS` | `5` | Failed logins allowed … |
 | `LOCKOUT_MINUTES` | `15` | … within this many minutes before the account is locked |
 | `SESSION_TIMEOUT_MINUTES` | `15` | Automatic logout after this much inactivity |
@@ -293,7 +304,7 @@ The final mark is shown only when all three scores have been entered. The weight
 |---|---|
 | Password storage | `password_hash()` / `password_verify()` (bcrypt); passwords are never stored in plain text |
 | Account lockout | 5 failed attempts within 15 minutes locks the account |
-| Session security | Session ID regenerated at login; automatic logout after 15 minutes of inactivity |
+| Session security | Session ID regenerated at login; automatic logout after 15 minutes of inactivity; a separate session cookie for each account logged in on the same browser |
 | Role-based access control | Every page calls `require_role()`; users only see the pages and records for their role |
 | CSRF protection | Every form carries a token that is checked on submission |
 | SQL injection | All queries use PDO prepared statements |
@@ -322,7 +333,8 @@ The system was tested with automated scripts that send real requests to the runn
 | 8. Reports and administration | 33 |
 | 9. Student account creation and opportunity browsing | 35 |
 | 10. Landing page, public opportunities, "log in to apply", instant accounts and show password | 39 |
-| **Total** | **251 — all passed (final run, 4 November 2026)** |
+| 11. Several accounts in one browser (separate session per account) | 28 |
+| **Total** | **279 — all passed (final run, 4 November 2026)** |
 
 On the development computer, pages responded in 6–23 ms on average, and 50 simultaneous requests all succeeded within 500 ms. Full results, test cases and the defects found and fixed are in Chapter Four of the project report.
 
@@ -352,7 +364,7 @@ Before putting SIAMS on a real server:
 3. **Do not run `seed.php` or `sample_opportunities.php`.** Remove `database/TEST_ACCOUNTS.md`, `database/test_password.php` and any test accounts.
 4. Create the first administrator account, then create the other users from the admin pages.
 5. Make sure the host honours `.htaccess` files (Apache), or block `config/`, `includes/`, `database/` and `uploads/` in the server configuration.
-6. Set `BASE_URL` in `config/config.php` if the system is not served from `/siams`.
+6. Set `BASE_PATH` in `config/config.php` if the system is not served from `/siams`. The host must have Apache's `mod_rewrite` turned on for the extra-account addresses (`/u/1/…`).
 7. Download a backup regularly from **Administrator → Backup**.
 
 ---

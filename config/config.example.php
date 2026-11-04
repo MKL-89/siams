@@ -15,7 +15,7 @@ define('DB_PASS', 'change-me');
 define('APP_NAME', 'SIAMS');
 define('APP_FULL_NAME', 'Student Industrial Attachment Management System');
 define('INSTITUTION', 'Kabarak University – Nakuru Town Campus');
-define('BASE_URL', '/siams');
+define('BASE_PATH', '/siams');   // address of the system; extra accounts use BASE_PATH/u/1 ... /u/9
 
 // Security settings
 define('MAX_LOGIN_ATTEMPTS', 5);        // failed attempts allowed ...

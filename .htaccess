@@ -1,0 +1,5 @@
+# Several accounts in one browser (see includes/auth.php):
+# /siams/u/1/... to /siams/u/9/... open the same pages as /siams/..., each with its own login session.
+RewriteEngine On
+RewriteRule ^u/[1-9]/?$ index.php [L,QSA]
+RewriteRule ^u/[1-9]/(.+)$ $1 [L,QSA]

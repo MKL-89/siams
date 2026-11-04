@@ -23,6 +23,69 @@ const ROLE_LABEL = [
     'student'     => 'Student',
 ];
 
+/* ---------- Several accounts in one browser ----------
+ * A browser shares its cookies between all its tabs, so one login session would be shared by
+ * every tab. To let different people (or roles) stay logged in side by side, each extra account
+ * gets its own session "slot" with its own cookie and its own address:
+ *   slot 0: /siams/...      slot 1: /siams/u/1/...   ...   slot 9: /siams/u/9/...
+ * The .htaccess file maps /siams/u/N/page.php to the same page.php. Logging out ends only the
+ * slot of that tab, so the other accounts stay logged in.
+ */
+if (!defined('BASE_PATH')) {
+    define('BASE_PATH', defined('BASE_URL') ? BASE_URL : '/siams');   // older config files
+}
+const MAX_SESSION_SLOT = 9;
+
+/** The slot named in the address of this request (0 when the address has no /u/N part). */
+function slot_from_request(): int
+{
+    $path = (string) parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+    return preg_match('#^' . preg_quote(BASE_PATH, '#') . '/u/([1-9])(/|$)#', $path, $m) ? (int) $m[1] : 0;
+}
+
+/** The slot this request is working in (changes when a second account logs in). */
+function current_slot(): int
+{
+    return $GLOBALS['siams_slot'] ??= slot_from_request();
+}
+
+/** Address of the system for one slot, e.g. /siams or /siams/u/2 */
+function slot_base(int $slot): string
+{
+    return BASE_PATH . ($slot ? '/u/' . $slot : '');
+}
+
+/** Name of the session cookie of one slot. */
+function slot_session_name(int $slot): string
+{
+    return 'SIAMSSESSID' . ($slot ? '_' . $slot : '');
+}
+
+if (!defined('BASE_URL')) {
+    define('BASE_URL', slot_base(current_slot()));   // used in links on every page
+}
+
+/**
+ * Leaves the session of this tab untouched and starts a new, empty session in a free slot,
+ * so that another account can log in without logging the first one out.
+ * Returns false when all slots are in use.
+ */
+function move_to_new_slot(): bool
+{
+    for ($s = 0; $s <= MAX_SESSION_SLOT; $s++) {
+        if ($s !== current_slot() && !isset($_COOKIE[slot_session_name($s)])) {
+            session_write_close();                 // the first account's session stays as it is
+            $GLOBALS['siams_slot'] = $s;
+            session_name(slot_session_name($s));
+            session_id(session_create_id());
+            session_start();
+            $_SESSION['last_activity'] = time();
+            return true;
+        }
+    }
+    return false;
+}
+
 /** Starts the session with safe cookie settings and ends it after inactivity. */
 function start_secure_session(): void
 {
@@ -35,12 +98,12 @@ function start_secure_session(): void
     header('Pragma: no-cache');
     session_set_cookie_params([
         'lifetime' => 0,
-        'path'     => BASE_URL,
+        'path'     => BASE_PATH,                  // every slot's cookie is sent to every slot's address
         'httponly' => true,                       // JavaScript cannot read the cookie
         'secure'   => !empty($_SERVER['HTTPS']),  // HTTPS only when available
         'samesite' => 'Strict',
     ]);
-    session_name('SIAMSSESSID');
+    session_name(slot_session_name(current_slot()));
     session_start();
 
     if (isset($_SESSION['last_activity'])
@@ -60,7 +123,7 @@ function e(?string $text): string
 
 function redirect(string $path): never
 {
-    header('Location: ' . BASE_URL . $path);
+    header('Location: ' . slot_base(current_slot()) . $path);
     exit;
 }
 
@@ -136,6 +199,11 @@ function attempt_login(string $email, string $password): ?string
         return 'This account has been deactivated. Please contact the attachment office.';
     }
 
+    // Someone else is already logged in in this tab: keep them logged in and open a new slot.
+    if (!empty($_SESSION['user_id']) && (int) $_SESSION['user_id'] !== (int) $user['user_id'] && !move_to_new_slot()) {
+        return 'Too many accounts are logged in on this browser. Please log out of one of them first.';
+    }
+
     record_attempt($email, true);
     start_user_session((int) $user['user_id'], $user['full_name'], $user['role']);
     log_action('login', $email);
@@ -161,6 +229,10 @@ function logout_user(): void
         setcookie(session_name(), '', time() - 3600, $p['path'], $p['domain'], $p['secure'], $p['httponly']);
     }
     session_destroy();
+    // If a session is started again in this request (to show "You have been logged out" or
+    // "Your session expired"), give it a new id, so its cookie replaces the deleted one.
+    unset($_COOKIE[session_name()]);
+    session_id(session_create_id());
 }
 
 /* ---------- Access control ---------- */

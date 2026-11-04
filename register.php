@@ -8,9 +8,8 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/opportunities.php';
 start_secure_session();
 
-if (!empty($_SESSION['user_id'])) {
-    redirect(ROLE_HOME[current_role()]);
-}
+// Someone already logged in in this tab can still create another account; it opens in its own session.
+$loggedInAs = !empty($_SESSION['user_id']) ? $_SESSION['full_name'] . ' (' . ROLE_LABEL[current_role()] . ')' : null;
 
 // Came from "Create a student account" on an opportunity: remember it for after login.
 if (isset($_GET['apply']) && open_opportunity_title((int) $_GET['apply']) !== null) {
@@ -71,6 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Another account is logged in in this tab: open a new session for the new student.
+    if (!$errors && $loggedInAs) {
+        unset($_SESSION['apply_after_login']);
+        if (!move_to_new_slot()) {
+            $errors[] = 'Too many accounts are logged in on this browser. Please log out of one of them first.';
+        }
+    }
+
     if (!$errors) {
         $pdo = db();
         $pdo->beginTransaction();
@@ -103,6 +110,13 @@ require __DIR__ . '/includes/header.php';
         <p class="text-muted">Students of the School of Science, Engineering &amp; Technology can create an account to
             find attachment opportunities, apply online and keep their logbook. Your account is ready to use as soon
             as you create it.</p>
+
+            <?php if ($loggedInAs): ?>
+                <div class="alert alert-secondary small">
+                    <i class="bi bi-people me-1"></i>You are logged in as <strong><?= e($loggedInAs) ?></strong>.
+                    A new account opens in its own session, and this account stays logged in in your other tabs.
+                </div>
+            <?php endif; ?>
 
             <?php if ($applyTitle): ?>
                 <div class="alert alert-primary small">
@@ -138,7 +152,7 @@ require __DIR__ . '/includes/header.php';
                     <div class="row g-3">
                         <div class="col-md-5">
                             <label class="form-label" for="reg_no">Registration number</label>
-                            <input class="form-control text-uppercase" id="reg_no" name="reg_no" maxlength="30" value="<?= e($u['reg_no']) ?>" placeholder="e.g. DIT/N/1234/09/25" required>
+                            <input class="form-control" id="reg_no" name="reg_no" maxlength="30" value="<?= e($u['reg_no']) ?>" placeholder="e.g. DIT/N/1234/09/25" required>
                         </div>
                         <div class="col-md-5">
                             <label class="form-label" for="programme">Programme</label>

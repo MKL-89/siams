@@ -1,16 +1,14 @@
 <?php
 /**
  * Login page (FR-01). Checks the email and password, then sends each user
- * to the dashboard for their role.
+ * to the dashboard for their role. If someone is already logged in in this tab,
+ * the new account opens in its own session and the first one stays logged in.
  */
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/opportunities.php';
 start_secure_session();
 
-// Already logged in: go straight to the dashboard.
-if (!empty($_SESSION['user_id'])) {
-    redirect(ROLE_HOME[current_role()]);
-}
+$loggedInAs = !empty($_SESSION['user_id']) ? $_SESSION['full_name'] . ' (' . ROLE_LABEL[current_role()] . ')' : null;
 
 // "Log in to apply": remember the opportunity so the student returns to it after logging in.
 // Only an opportunity id is stored (never a URL), so this cannot redirect anywhere else.
@@ -38,10 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') {
         $error = 'Please enter a valid email address and your password.';
     } else {
+        $applyId = (int) ($_SESSION['apply_after_login'] ?? 0);
+        unset($_SESSION['apply_after_login']);
         $error = attempt_login($email, $password);
+        if ($error !== null && $applyId) {
+            $_SESSION['apply_after_login'] = $applyId;   // keep it for the next try
+        }
         if ($error === null) {
-            $applyId = (int) ($_SESSION['apply_after_login'] ?? 0);
-            unset($_SESSION['apply_after_login']);
             if ($applyId && current_role() === 'student') {
                 redirect('/student/opportunity.php?id=' . $applyId);
             }
@@ -65,6 +66,14 @@ require __DIR__ . '/includes/header.php';
 
             <?php if ($flash): ?>
                 <div class="alert alert-info py-2 small"><?= e($flash) ?></div>
+            <?php endif; ?>
+            <?php if ($loggedInAs): ?>
+                <div class="alert alert-secondary py-2 small">
+                    <i class="bi bi-people me-1"></i>You are logged in as <strong><?= e($loggedInAs) ?></strong>.
+                    <a href="<?= BASE_URL . ROLE_HOME[current_role()] ?>">Back to my dashboard</a>.<br>
+                    To use another account at the same time, log in below. It opens in its own session,
+                    and this account stays logged in in your other tabs.
+                </div>
             <?php endif; ?>
             <?php if ($applyTitle): ?>
                 <div class="alert alert-primary py-2 small">
