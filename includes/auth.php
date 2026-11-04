@@ -137,15 +137,20 @@ function attempt_login(string $email, string $password): ?string
     }
 
     record_attempt($email, true);
-    session_regenerate_id(true);   // new session id after login (prevents session fixation)
-    $_SESSION['user_id']   = (int) $user['user_id'];
-    $_SESSION['full_name'] = $user['full_name'];
-    $_SESSION['role']      = $user['role'];
-    unset($_SESSION['csrf_token']);
-
-    db()->prepare('UPDATE users SET last_login = NOW() WHERE user_id = ?')->execute([$user['user_id']]);
+    start_user_session((int) $user['user_id'], $user['full_name'], $user['role']);
     log_action('login', $email);
     return null;
+}
+
+/** Logs a user in: used after a correct password and right after a new account is created. */
+function start_user_session(int $userId, string $fullName, string $role): void
+{
+    session_regenerate_id(true);   // new session id after login (prevents session fixation)
+    $_SESSION['user_id']   = $userId;
+    $_SESSION['full_name'] = $fullName;
+    $_SESSION['role']      = $role;
+    unset($_SESSION['csrf_token']);
+    db()->prepare('UPDATE users SET last_login = NOW() WHERE user_id = ?')->execute([$userId]);
 }
 
 function logout_user(): void

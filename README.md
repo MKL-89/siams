@@ -37,9 +37,12 @@ A web-based system that manages the full industrial attachment cycle for the Sch
 
 ## Features
 
+- **Public landing page**: explains what SIAMS does, shows live figures (open opportunities, slots, organizations, counties) and the six newest opportunities.
+- **Public opportunity browsing**: anyone can search, filter and read opportunities without an account. An account is needed only to apply: **Log in to apply** brings a student straight back to that opportunity after logging in.
 - **Secure login** with role-based access for five user groups, account lockout after repeated failed attempts, and automatic logout after inactivity.
-- **Student account creation**: students create their own account from the login page with their registration number; the coordinator approves it before the student can log in.
-- **Host organization registration**: organizations sign up online and are approved or rejected by the coordinator.
+- **Student account creation**: students create their own account with their registration number. The account is active at once and the student is logged in straight away.
+- **Host organization registration**: organizations sign up online and can post opportunities immediately; students see them straight away. The coordinator can still reject an organization, and the administrator can deactivate any account.
+- **Show password**: every password field has an eye button to show or hide what was typed.
 - **Attachment opportunities**: organizations post vacancies; students search and filter them by keyword, sector and county, sort them (closing soonest, newest, title) and browse them 12 per page.
 - **Applications and placements**: students apply, organizations accept applicants, and the coordinator approves the placement.
 - **Supervisor assignment**: the coordinator assigns a university supervisor to each placed student, and supervisors record visits.
@@ -56,7 +59,7 @@ A web-based system that manages the full industrial attachment cycle for the Sch
 | Role | Main tasks |
 |---|---|
 | **Administrator** | Creates and deactivates user accounts, resets passwords, views the activity log, downloads database backups. |
-| **Attachment Coordinator** (Office of Industrial Linkages & Attachment) | Approves student accounts and organizations, manages attachment periods, approves placements, assigns university supervisors, views results and documents, produces reports. |
+| **Attachment Coordinator** (Office of Industrial Linkages & Attachment) | Views student accounts and organizations (and can reject them), manages attachment periods, approves placements, assigns university supervisors, views results and documents, produces reports. |
 | **University Supervisor** (lecturer) | Views assigned students, records supervision visits, reads logbooks, submits the university assessment. |
 | **Industrial Supervisor** (host organization) | Posts opportunities, accepts or rejects applicants, confirms logbook entries, submits the industrial assessment. |
 | **Student** | Creates an account, searches and applies for opportunities, tracks applications, keeps the weekly logbook, uploads documents, views results. |
@@ -101,9 +104,11 @@ The application connects to the database with its own limited account (`siams_ap
 
 ```
 siams/
-├── index.php              Sends each user to their role's dashboard
+├── index.php              Public landing page (logged-in users go to their dashboard)
+├── opportunities.php      Public list of open opportunities (search, filters, pages)
+├── opportunity.php        Public details of one opportunity, with "Log in to apply"
 ├── login.php / logout.php Login and logout
-├── register.php           Public "Create a student account" form (approved by the coordinator)
+├── register.php           Public "Create a student account" form (account active at once)
 ├── register_host.php      Public registration form for host organizations
 ├── account.php            "My account": profile and password change for every user
 ├── download.php           Serves uploaded files after an access check
@@ -118,12 +123,14 @@ siams/
 ├── includes/              Shared code — not reachable from the browser
 │   ├── auth.php           Sessions, login, CSRF tokens, role checks
 │   ├── helpers.php        Escaping, flash messages, audit logging, validation, county and sector lists
-│   ├── header.php / footer.php   Page layout and role menus
+│   ├── header.php / footer.php   Page layout, role menus and the visitor menu
+│   ├── opportunities.php  Opportunity rules and the shared search (public and student pages)
+│   ├── opportunity_list.php      Search form, cards and page links used by both opportunity lists
 │   ├── placements.php     Placement and application rules
 │   ├── logbook.php        Logbook rules
 │   ├── assessment.php     Scores and final-mark calculation
 │   ├── documents.php      Upload checks and storage
-│   └── ...                Dashboard, opportunities and organization helpers
+│   └── ...                Dashboard and organization helpers
 │
 ├── config/                Settings — not reachable from the browser
 │   ├── config.example.php Template for config.php
@@ -138,7 +145,8 @@ siams/
 │   └── TEST_ACCOUNTS.md   Test logins for development
 │
 ├── uploads/               Uploaded PDFs — not reachable directly; served through download.php
-└── assets/css/style.css   Custom styles, including print styles for reports
+├── assets/css/style.css   Custom styles, including the landing page and print styles for reports
+└── assets/js/app.js       Show/hide password button on every password field
 ```
 
 ---
@@ -176,15 +184,22 @@ siams/
    C:\xampp\php\php.exe C:\xampp\htdocs\siams\database\seed.php
    ```
 
-6. Open **http://localhost/siams** and log in with one of the accounts in `database/TEST_ACCOUNTS.md`.
+6. Open **http://localhost/siams**. The landing page opens; click **Log in** and use one of the accounts in `database/TEST_ACCOUNTS.md`.
 
 ---
 
 ## Running the system
 
 1. Open the **XAMPP Control Panel** and start **Apache** and **MySQL**.
-2. Go to **http://localhost/siams** in your browser.
-3. Log in. Each role lands on its own dashboard.
+2. Go to **http://localhost/siams** in your browser. Visitors see the landing page and can browse opportunities without an account.
+3. Click **Log in** (or **Create account**). After logging in, each role lands on its own dashboard.
+
+### How a student applies
+
+1. Open an opportunity from the landing page or **Opportunities**, and click **Log in to apply**.
+2. A student without an account clicks **Create a student account** instead. The account is ready at once.
+3. After logging in (or creating the account), the student is taken straight back to the opportunity and clicks **Apply for this opportunity**.
+4. The application then appears under **My applications** on the student's dashboard.
 
 To see the database directly, open **http://localhost/phpmyadmin** and select `siams_db`.
 
@@ -298,15 +313,16 @@ The system was tested with automated scripts that send real requests to the runn
 | Module | Checks |
 |---|---|
 | 1. Login and role-based access | 16 |
-| 2. Organizations and opportunities | 21 |
+| 2. Organizations and opportunities | 22 |
 | 3. Applications and placements | 25 |
 | 4. Supervisor assignment and visits | 22 |
 | 5. Electronic logbook | 20 |
 | 6. Assessments and final mark | 18 |
 | 7. Document uploads | 21 |
 | 8. Reports and administration | 33 |
-| 9. Student account creation and opportunity browsing | 34 |
-| **Total** | **210 — all passed (final run, 4 November 2026)** |
+| 9. Student account creation and opportunity browsing | 35 |
+| 10. Landing page, public opportunities, "log in to apply", instant accounts and show password | 39 |
+| **Total** | **251 — all passed (final run, 4 November 2026)** |
 
 On the development computer, pages responded in 6–23 ms on average, and 50 simultaneous requests all succeeded within 500 ms. Full results, test cases and the defects found and fixed are in Chapter Four of the project report.
 

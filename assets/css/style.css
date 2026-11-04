@@ -24,3 +24,19 @@
 .stat-card { border: 0; border-left: 4px solid var(--siams-primary); }
 .stat-card .stat-value { font-size: 1.8rem; font-weight: 600; color: var(--siams-primary); }
 .stat-card .stat-icon { font-size: 2rem; color: var(--siams-primary); opacity: .35; }
+
+/* Public landing page */
+.text-siams { color: var(--siams-primary) !important; }
+.landing-hero { background: linear-gradient(135deg, var(--siams-primary-dark) 0%, var(--siams-primary) 60%, #1673b8 100%); }
+.landing-eyebrow { color: #bcd7f0; letter-spacing: .06em; }
+.landing-lead { color: rgba(255, 255, 255, .85); }
+.landing-stat { background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .18); }
+.landing-step-icon, .landing-role-icon {
+    width: 3rem; height: 3rem; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: #e7f0f9; color: var(--siams-primary); font-size: 1.35rem;
+}
+.landing-role-icon { width: 3.5rem; height: 3.5rem; font-size: 1.6rem; }
+.landing-cta { background: linear-gradient(135deg, var(--siams-primary) 0%, var(--siams-primary-dark) 100%); }
+.opportunity-card { transition: box-shadow .15s ease, transform .15s ease; }
+.opportunity-card:hover { box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .1) !important; transform: translateY(-2px); }
+@media (prefers-reduced-motion: reduce) { .opportunity-card, .opportunity-card:hover { transition: none; transform: none; } }

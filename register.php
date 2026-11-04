@@ -1,20 +1,27 @@
 <?php
 /**
- * Student account creation. A student registers with their registration number;
- * the account stays "pending" until the attachment coordinator approves it,
- * so only genuine students of the school can log in.
+ * Student account creation. The account is active at once: the student is logged in
+ * straight away and taken to the opportunity they wanted to apply for, or to their dashboard.
+ * The coordinator and administrator can still deactivate an account later.
  */
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/opportunities.php';
 start_secure_session();
 
 if (!empty($_SESSION['user_id'])) {
     redirect(ROLE_HOME[current_role()]);
 }
 
+// Came from "Create a student account" on an opportunity: remember it for after login.
+if (isset($_GET['apply']) && open_opportunity_title((int) $_GET['apply']) !== null) {
+    $_SESSION['apply_after_login'] = (int) $_GET['apply'];
+}
+$applyId    = (int) ($_SESSION['apply_after_login'] ?? 0);
+$applyTitle = $applyId ? open_opportunity_title($applyId) : null;
+
 $u = ['full_name' => '', 'email' => '', 'phone' => '', 'reg_no' => '',
       'programme' => 'Diploma in Information Technology', 'year_of_study' => '1'];
 $errors = [];
-$done = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($u as $k => $_) { $u[$k] = post_str($k); }
@@ -67,14 +74,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$errors) {
         $pdo = db();
         $pdo->beginTransaction();
-        $pdo->prepare("INSERT INTO users (full_name, email, phone, password_hash, role, status) VALUES (?, ?, ?, ?, 'student', 'pending')")
+        $pdo->prepare("INSERT INTO users (full_name, email, phone, password_hash, role, status) VALUES (?, ?, ?, ?, 'student', 'active')")
             ->execute([$u['full_name'], $u['email'], $u['phone'], password_hash($password, PASSWORD_DEFAULT)]);
         $userId = (int) $pdo->lastInsertId();
         $pdo->prepare('INSERT INTO students (user_id, reg_no, programme, year_of_study) VALUES (?, ?, ?, ?)')
             ->execute([$userId, $u['reg_no'], $u['programme'], (int) $u['year_of_study']]);
         $pdo->commit();
         log_action('student_registered', $u['reg_no'] . ' (' . $u['email'] . ')', $userId);
-        $done = true;
+
+        // Log the new student in and continue where they were going.
+        start_user_session($userId, $u['full_name'], 'student');
+        unset($_SESSION['apply_after_login']);
+        if ($applyTitle) {
+            flash('Welcome, ' . $u['full_name'] . '! Your account is ready. You can now apply for this opportunity.');
+            redirect('/student/opportunity.php?id=' . $applyId);
+        }
+        flash('Welcome, ' . $u['full_name'] . '! Your account is ready. Browse the opportunities and apply.');
+        redirect('/student/index.php');
     }
 }
 
@@ -85,17 +101,15 @@ require __DIR__ . '/includes/header.php';
     <div class="col-lg-8">
         <h1 class="h3 mb-1">Create a student account</h1>
         <p class="text-muted">Students of the School of Science, Engineering &amp; Technology can create an account to
-            find attachment opportunities, apply online and keep their logbook. The attachment office will confirm
-            your details before you can log in.</p>
+            find attachment opportunities, apply online and keep their logbook. Your account is ready to use as soon
+            as you create it.</p>
 
-        <?php if ($done): ?>
-            <div class="alert alert-success">
-                <h2 class="h5">Account created</h2>
-                Your account is awaiting approval by the attachment office. You will be able to log in with your
-                email address and password once it has been approved.
-            </div>
-            <a class="btn btn-siams" href="<?= BASE_URL ?>/login.php">Back to login</a>
-        <?php else: ?>
+            <?php if ($applyTitle): ?>
+                <div class="alert alert-primary small">
+                    <i class="bi bi-send me-1"></i>Create your account to apply for <strong><?= e($applyTitle) ?></strong>.
+                    You will be taken straight back to it to send your application.
+                </div>
+            <?php endif; ?>
             <div class="alert alert-light border small">
                 <i class="bi bi-building me-1"></i>Registering a host organization instead?
                 <a href="<?= BASE_URL ?>/register_host.php">Register your organization</a>
@@ -166,7 +180,6 @@ require __DIR__ . '/includes/header.php';
                     <button type="submit" class="btn btn-siams"><i class="bi bi-person-plus me-1"></i>Create account</button>
                 </div>
             </form>
-        <?php endif; ?>
     </div>
 </div>
 <?php require __DIR__ . '/includes/footer.php'; ?>

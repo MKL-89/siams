@@ -37,6 +37,6 @@ with the same password:
 | Demo Lakeview Hotel and Conference Centre | hotel@siams.test |
 | Sample Lake Basin Internet Services | isp@siams.test |
 
-New student accounts created through **Create a student account** on the login
-page stay pending until the coordinator approves them under
-**Dashboard → Manage student accounts**.
+New student and host organization accounts created from the website are active
+at once, and the new user is logged in straight away. The coordinator can see
+them under **Dashboard → Manage student accounts** and **Organizations**.

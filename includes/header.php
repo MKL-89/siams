@@ -89,5 +89,37 @@ $current_path = substr(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), strlen(
         </div>
     </div>
 </nav>
+<?php else: ?>
+<?php
+// Visitors who are not logged in: links to the public pages.
+$publicMenu = ['Home' => '/index.php', 'Opportunities' => '/opportunities.php', 'For organizations' => '/register_host.php'];
+?>
+<nav class="navbar navbar-expand-lg navbar-dark bg-siams">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="<?= BASE_URL ?>/index.php">
+            <i class="bi bi-briefcase-fill me-1"></i><?= APP_NAME ?>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav me-auto">
+                <?php foreach ($publicMenu as $label => $path): ?>
+                    <li class="nav-item">
+                        <a class="nav-link<?= $current_path === $path || ($path === '/index.php' && $current_path === '/') || ($path === '/opportunities.php' && $current_path === '/opportunity.php') ? ' active' : '' ?>"
+                           href="<?= BASE_URL . $path ?>"><?= e($label) ?></a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+            <a class="btn btn-outline-light btn-sm me-2 text-nowrap" href="<?= BASE_URL ?>/login.php">
+                <i class="bi bi-box-arrow-in-right me-1"></i>Log in
+            </a>
+            <a class="btn btn-light btn-sm text-nowrap text-siams fw-semibold" href="<?= BASE_URL ?>/register.php">
+                <i class="bi bi-person-plus me-1"></i>Create account
+            </a>
+        </div>
+    </div>
+</nav>
 <?php endif; ?>
-<main class="container py-4">
+<main class="<?= empty($full_width) ? 'container py-4' : '' ?>">

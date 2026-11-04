@@ -14,6 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = db()->prepare('UPDATE users SET status = ? WHERE user_id = ?');
         $stmt->execute([$status, $userId]);
         if ($stmt->rowCount()) {
+            if ($status === 'active') {
+                // Activating a host's supervisor also approves their organization if it is still
+                // pending, so the opportunities they post are shown to students.
+                db()->prepare("UPDATE organizations o JOIN ind_supervisors i ON i.org_id = o.org_id
+                               SET o.status = 'approved', o.reviewed_by = ?, o.reviewed_at = NOW()
+                               WHERE i.user_id = ? AND o.status = 'pending'")
+                    ->execute([$_SESSION['user_id'], $userId]);
+            }
             log_action('user_' . ($status === 'active' ? 'activated' : 'deactivated'), 'User #' . $userId);
             flash('Account ' . ($status === 'active' ? 'activated.' : 'deactivated.'));
         }

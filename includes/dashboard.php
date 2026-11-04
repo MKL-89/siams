@@ -36,4 +36,5 @@ function dashboard_heading(string $subtitle): void
         <p class="text-muted mb-0"><?= e($subtitle) ?></p>
     </div>
     <?php
+    show_flash();   // e.g. the welcome message after creating an account
 }

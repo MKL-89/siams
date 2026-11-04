@@ -4,12 +4,25 @@
  * to the dashboard for their role.
  */
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/opportunities.php';
 start_secure_session();
 
 // Already logged in: go straight to the dashboard.
 if (!empty($_SESSION['user_id'])) {
     redirect(ROLE_HOME[current_role()]);
 }
+
+// "Log in to apply": remember the opportunity so the student returns to it after logging in.
+// Only an opportunity id is stored (never a URL), so this cannot redirect anywhere else.
+if (isset($_GET['apply'])) {
+    $applyId = (int) $_GET['apply'];
+    if (open_opportunity_title($applyId) !== null) {
+        $_SESSION['apply_after_login'] = $applyId;
+    } else {
+        unset($_SESSION['apply_after_login']);
+    }
+}
+$applyTitle = isset($_SESSION['apply_after_login']) ? open_opportunity_title((int) $_SESSION['apply_after_login']) : null;
 
 $error = null;
 $email = '';
@@ -27,6 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $error = attempt_login($email, $password);
         if ($error === null) {
+            $applyId = (int) ($_SESSION['apply_after_login'] ?? 0);
+            unset($_SESSION['apply_after_login']);
+            if ($applyId && current_role() === 'student') {
+                redirect('/student/opportunity.php?id=' . $applyId);
+            }
             redirect(ROLE_HOME[current_role()]);
         }
     }
@@ -47,6 +65,12 @@ require __DIR__ . '/includes/header.php';
 
             <?php if ($flash): ?>
                 <div class="alert alert-info py-2 small"><?= e($flash) ?></div>
+            <?php endif; ?>
+            <?php if ($applyTitle): ?>
+                <div class="alert alert-primary py-2 small">
+                    <i class="bi bi-send me-1"></i>Log in to apply for <strong><?= e($applyTitle) ?></strong>.
+                    You will be taken back to it after logging in.
+                </div>
             <?php endif; ?>
             <?php if ($error): ?>
                 <div class="alert alert-danger py-2 small" role="alert"><?= e($error) ?></div>
@@ -70,7 +94,7 @@ require __DIR__ . '/includes/header.php';
             </form>
             <hr class="my-4">
             <p class="text-center small text-muted mb-2">Don't have an account?</p>
-            <a class="btn btn-outline-primary w-100 mb-2" href="<?= BASE_URL ?>/register.php">
+            <a class="btn btn-outline-primary w-100 mb-2" href="<?= BASE_URL ?>/register.php<?= $applyTitle ? '?apply=' . (int) $_SESSION['apply_after_login'] : '' ?>">
                 <i class="bi bi-person-plus me-1"></i>Create a student account
             </a>
             <p class="text-center small text-muted mb-0">

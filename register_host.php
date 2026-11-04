@@ -1,7 +1,8 @@
 <?php
 /**
- * Host organization registration (FR-12). Creates the organization and its
- * industrial supervisor account; both stay "pending" until a coordinator approves them (FR-21).
+ * Host organization registration (FR-12). Creates the organization and its industrial
+ * supervisor account, both active at once, and logs the supervisor in so they can post
+ * opportunities straight away. The coordinator can still reject (deactivate) an organization later.
  */
 require_once __DIR__ . '/includes/auth.php';
 start_secure_session();
@@ -13,7 +14,6 @@ if (!empty($_SESSION['user_id'])) {
 $o = ['name' => '', 'sector' => '', 'county' => '', 'address' => '', 'contact_email' => '', 'contact_phone' => ''];
 $s = ['full_name' => '', 'position' => '', 'email' => '', 'phone' => ''];
 $errors = [];
-$done = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($o as $k => $_) { $o[$k] = post_str($k); }
@@ -46,11 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$errors) {
         $pdo = db();
         $pdo->beginTransaction();
-        $pdo->prepare('INSERT INTO organizations (name, sector, county, address, contact_email, contact_phone) VALUES (?, ?, ?, ?, ?, ?)')
+        $pdo->prepare("INSERT INTO organizations (name, sector, county, address, contact_email, contact_phone, status, reviewed_at) VALUES (?, ?, ?, ?, ?, ?, 'approved', NOW())")
             ->execute([$o['name'], $o['sector'], $o['county'], $o['address'], $o['contact_email'], $o['contact_phone']]);
         $orgId = (int) $pdo->lastInsertId();
 
-        $pdo->prepare("INSERT INTO users (full_name, email, phone, password_hash, role, status) VALUES (?, ?, ?, ?, 'industrial', 'pending')")
+        $pdo->prepare("INSERT INTO users (full_name, email, phone, password_hash, role, status) VALUES (?, ?, ?, ?, 'industrial', 'active')")
             ->execute([$s['full_name'], $s['email'], $s['phone'], password_hash($password, PASSWORD_DEFAULT)]);
         $userId = (int) $pdo->lastInsertId();
 
@@ -58,7 +58,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ->execute([$userId, $orgId, $s['position']]);
         $pdo->commit();
         log_action('host_registered', $o['name'] . ' (' . $s['email'] . ')', $userId);
-        $done = true;
+
+        start_user_session($userId, $s['full_name'], 'industrial');
+        flash('Welcome, ' . $s['full_name'] . '! ' . $o['name'] . ' is registered. You can now post attachment opportunities.');
+        redirect('/industrial/index.php');
     }
 }
 
@@ -69,16 +72,8 @@ require __DIR__ . '/includes/header.php';
     <div class="col-lg-8">
         <h1 class="h3 mb-1">Register your organization</h1>
         <p class="text-muted">Host organizations can register to post attachment opportunities for students.
-            The attachment office will review your registration before you can log in.</p>
+            Your account is ready as soon as you register, and the opportunities you post are shown to students straight away.</p>
 
-        <?php if ($done): ?>
-            <div class="alert alert-success">
-                <h2 class="h5">Registration received</h2>
-                Thank you. Your registration is awaiting approval by the attachment office.
-                You will be able to log in once it has been approved.
-            </div>
-            <a class="btn btn-siams" href="<?= BASE_URL ?>/login.php">Back to login</a>
-        <?php else: ?>
             <?php show_errors($errors); ?>
             <form method="post" class="card shadow-sm" novalidate>
                 <?= csrf_field() ?>
@@ -120,7 +115,6 @@ require __DIR__ . '/includes/header.php';
                     <button type="submit" class="btn btn-siams">Submit registration</button>
                 </div>
             </form>
-        <?php endif; ?>
     </div>
 </div>
 <?php require __DIR__ . '/includes/footer.php'; ?>
