@@ -5,7 +5,8 @@ config/config.php
 uploads/*
 !uploads/.htaccess
 
-# Editor and system files
+# Editor and system files (including Word's temporary "~$" lock files)
+~$*
 .vscode/
 .idea/
 Thumbs.db
