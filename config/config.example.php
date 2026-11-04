@@ -20,6 +20,6 @@ define('BASE_URL', '/siams');
 // Security settings
 define('MAX_LOGIN_ATTEMPTS', 5);        // failed attempts allowed ...
 define('LOCKOUT_MINUTES', 15);          // ... within this many minutes
-define('SESSION_TIMEOUT_MINUTES', 30);  // log out after this much inactivity
+define('SESSION_TIMEOUT_MINUTES', 15);  // log out after this much inactivity
 
 date_default_timezone_set('Africa/Nairobi');
